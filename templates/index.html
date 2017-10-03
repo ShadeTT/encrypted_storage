@@ -1,0 +1,62 @@
+{% load static %}
+{% load thumbnail %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/slider.css' %}" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+
+<div class="wrapper">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>File</th>
+            <th>User</th>
+            <th>Description</th>
+            <th>Created</th>
+            <th>Updated</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for uploadedfile in uploadedfile_list %}
+            <tr>
+                <th scope="row">{{ uploadedfile.id }}</th>
+                <th>
+                    <a href="{{ uploadedfile.f.url }}">{{ uploadedfile.name }}</a>
+                </th>
+                <th>{{ uploadedfile.user.username }}</th>
+                <td>{{ uploadedfile.description }}</td>
+                <td>{{ uploadedfile.created }}</td>
+                <td>{{ uploadedfile.updated }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="slider" style="right:-404px;">
+    <div id="sidebar" onclick="open_panel()">
+        <img src="{% static 'images/c065867ac7beefe25dc50a1869ae057e.png' %}">
+    </div>
+    <div id="header">
+        <form action="{% url 'app:upload' %}" id="id-upload-form">
+            <input name="f" type="file">
+            <textarea name="description" id="id_description" cols="30" rows="30"></textarea>
+            <input type="submit" value="Отправить">
+        </form>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{% static 'js/slider.js' %}"></script>
+<script src="{% static 'js/csrf.js' %}"></script>
+</body>
+</html>
