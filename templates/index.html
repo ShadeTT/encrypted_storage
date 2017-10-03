@@ -29,10 +29,10 @@
             <tr>
                 <th scope="row">{{ uploadedfile.id }}</th>
                 <th>
-                    <a href="{{ uploadedfile.f.url }}">{{ uploadedfile.name }}</a>
+                    <a href="{{ uploadedfile.f.url }}" data-content="{{ uploadedfile.name }}" class="encrypted">Нужен ключ</a>
                 </th>
+                <td class="encrypted" data-content="{{ uploadedfile.description }}">Нужен ключ</td>
                 <th>{{ uploadedfile.user.username }}</th>
-                <td>{{ uploadedfile.description }}</td>
                 <td>{{ uploadedfile.created }}</td>
                 <td>{{ uploadedfile.updated }}</td>
             </tr>
@@ -41,14 +41,21 @@
     </table>
 </div>
 
+<div id="id_decrypt" style="background-image: url({% static 'images/padlockIcon.png' %});width: 100px;height: 100px;position: absolute;right: 0;box-shadow: 0 0 8px grey;cursor: pointer">
+
+</div>
+
 <div id="slider" style="right:-404px;">
     <div id="sidebar" onclick="open_panel()">
         <img src="{% static 'images/c065867ac7beefe25dc50a1869ae057e.png' %}">
     </div>
     <div id="header">
         <form action="{% url 'app:upload' %}" id="id-upload-form">
-            <input name="f" type="file">
-            <textarea name="description" id="id_description" cols="30" rows="30"></textarea>
+            <input type="file">
+            <input type="hidden" name="file_content" id="id_file_content">
+            <input type="hidden" name="name" id="id_name">
+            <input type="hidden" name="description" id="id_description_hidden">
+            <textarea id="id_description" cols="30" rows="30"></textarea>
             <input type="submit" value="Отправить">
         </form>
     </div>
@@ -58,5 +65,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="{% static 'js/slider.js' %}"></script>
 <script src="{% static 'js/csrf.js' %}"></script>
+<script src="https://bitwiseshiftleft.github.com/sjcl/sjcl.js"></script>
+<script src="{% static 'js/scripts.js' %}"></script>
 </body>
 </html>

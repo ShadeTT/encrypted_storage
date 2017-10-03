@@ -11,7 +11,7 @@ __author__ = 'shade'
 
 class UploadedFile(models.Model):
 
-    f = models.FileField('Файл', upload_to=chunked_path)
+    file_content = models.TextField('Файл')
     name = models.CharField(max_length=300, default='Без названия')
     description = models.CharField(max_length=300, null=True, blank=True)
     user = models.ForeignKey(User)

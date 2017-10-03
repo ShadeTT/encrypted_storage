@@ -27,7 +27,7 @@ class UploadView(AjaxableCreateMixin):
 
     model = UploadedFile
 
-    fields = ('f', 'description', 'user',)
+    fields = ('name', 'description', 'user',)
 
     def get_form_kwargs(self):
 
@@ -35,6 +35,7 @@ class UploadView(AjaxableCreateMixin):
 
         data = self.request.POST.copy()
         data.update({'user': User.objects.last().id})
+        data.update({'file_content': data.pop('file_content')})
         kwargs['data'] = data
 
         return kwargs

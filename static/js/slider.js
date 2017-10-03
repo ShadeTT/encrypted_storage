@@ -31,28 +31,3 @@ function slideIn() {
         setTimeout(slideIn, 1);
     }
 }
-
-$(document).ready(function () {
-    $("#id-upload-form").submit(function (e) {
-
-        var formData = new FormData(this);
-        var url = $(this).attr("action");
-
-        e.preventDefault();
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: formData,
-            async: false,
-            success: function (data) {
-                console.log(data);
-            },
-            cache: false,
-            contentType: false,
-            processData: false
-        });
-
-        return false;
-    });
-});
