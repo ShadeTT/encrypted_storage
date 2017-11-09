@@ -29,7 +29,7 @@
             <tr>
                 <th scope="row">{{ uploadedfile.id }}</th>
                 <th>
-                    <a href="{{ uploadedfile.f.url }}" data-content="{{ uploadedfile.name }}" class="encrypted">Нужен ключ</a>
+                    <a href="{% url 'app:download' uploadedfile.id %}" data-content="{{ uploadedfile.name }}" class="encrypted download">Нужен ключ</a>
                 </th>
                 <td class="encrypted" data-content="{{ uploadedfile.description }}">Нужен ключ</td>
                 <th>{{ uploadedfile.user.username }}</th>

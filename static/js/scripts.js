@@ -5,7 +5,12 @@ $(document).ready(function () {
         var reader = new FileReader();
         reader.onload = function (e) {
             var result = this.result;
+
+            // console.log(result);
+
             $('#id_file_content').val(sjcl.encrypt('pppppppppp', result));
+            download(sjcl.decrypt('pppppppppp', $('#id_file_content').val()), '111.png', 'image/png');
+            $('#id_file_content').val(sjcl.encrypt('pppppppppp', result))
             $('#id_name').val(sjcl.encrypt('pppppppppp', file.name));
         };
         reader.readAsBinaryString(file);
@@ -43,5 +48,27 @@ $(document).ready(function () {
             $(this).text(sjcl.decrypt('pppppppppp', JSON.stringify($(this).data("content"))));
         });
     });
+
+    $('.download').click(function(e){
+        e.preventDefault();
+
+        $.getJSON($(this).attr('href'), function (answer) {
+
+            console.log(typeof answer.file_content);
+            console.log(JSON.parse(answer.file_content));
+
+            download(sjcl.decrypt('pppppppppp', JSON.stringify(JSON.parse(answer.file_content))), sjcl.decrypt('pppppppppp', answer.name), 'text/plain');
+
+        });
+
+    });
+
+    function download(text, name, type) {
+        var a = document.createElement("a");
+        var file = new Blob([text], {type: type});
+        a.href = URL.createObjectURL(file);
+        a.download = name;
+        a.click();
+    }
 
 });
