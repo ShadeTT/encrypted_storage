@@ -1,15 +1,13 @@
 # coding=utf-8
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.generic.base import TemplateView
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.detail import BaseDetailView
 from django.views.generic.list import ListView
 
 from app.models import UploadedFile
 from common.views import AjaxableCreateMixin, JSONResponseMixin
-from django.views.generic.detail import BaseDetailView
 
 __author__ = 'shade'
 
@@ -20,6 +18,7 @@ class IndexView(ListView):
     template_name = 'index.html'
 
     @method_decorator(ensure_csrf_cookie)
+    @method_decorator(login_required(login_url='/admin/'))
     def dispatch(self, request, *args, **kwargs):
         return super(IndexView, self).dispatch(request, *args, **kwargs)
 
@@ -29,6 +28,10 @@ class UploadView(AjaxableCreateMixin):
     model = UploadedFile
 
     fields = ('name', 'description', 'user', 'file_content',)
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(UploadView, self).dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
 
@@ -45,6 +48,10 @@ class DownloadView(JSONResponseMixin, BaseDetailView):
 
     pk_url_kwarg = 'pk'
     model = UploadedFile
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(DownloadView, self).dispatch(request, *args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
         return self.render_to_json_response(context, **response_kwargs)

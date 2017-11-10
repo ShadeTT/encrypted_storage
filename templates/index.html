@@ -10,16 +10,15 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
 
 </head>
-<body>
+<body style="position: relative">
 
 <div class="wrapper">
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>#</th>
             <th>File</th>
-            <th>User</th>
             <th>Description</th>
+            <th>User</th>
             <th>Created</th>
             <th>Updated</th>
         </tr>
@@ -27,7 +26,6 @@
         <tbody>
         {% for uploadedfile in uploadedfile_list %}
             <tr>
-                <th scope="row">{{ uploadedfile.id }}</th>
                 <th>
                     <a href="{% url 'app:download' uploadedfile.id %}" data-content="{{ uploadedfile.name }}" class="encrypted download">Нужен ключ</a>
                 </th>
@@ -41,7 +39,7 @@
     </table>
 </div>
 
-<div id="id_decrypt" style="background-image: url({% static 'images/padlockIcon.png' %});width: 100px;height: 100px;position: absolute;right: 0;box-shadow: 0 0 8px grey;cursor: pointer">
+<div id="id_decrypt" style="background-image: url({% static 'images/padlockIcon.png' %});width: 100px;top: 80px;height: 100px;position: fixed;right: 0;box-shadow: 0 0 8px grey;cursor: pointer">
 
 </div>
 

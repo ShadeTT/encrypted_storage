@@ -1,16 +1,39 @@
 $(document).ready(function () {
 
+    function base64ToArrayBuffer(base64) {
+        var binaryString = base64;
+        var binaryLen = binaryString.length;
+        var bytes = new Uint8Array(binaryLen);
+        for (var i = 0; i < binaryLen; i++) {
+            var ascii = binaryString.charCodeAt(i);
+            bytes[i] = ascii;
+        }
+        return bytes;
+    }
+
+    var saveByteArray = (function () {
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        return function (data, name) {
+            var blob = new Blob(data, {type: "octet/stream"}),
+                url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = name;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+    }());
+
+
     document.querySelector('input[type="file"]').addEventListener('change', function (e) {
         var file = this.files[0];
         var reader = new FileReader();
         reader.onload = function (e) {
             var result = this.result;
 
-            // console.log(result);
-
             $('#id_file_content').val(sjcl.encrypt('pppppppppp', result));
-            download(sjcl.decrypt('pppppppppp', $('#id_file_content').val()), '111.png', 'image/png');
-            $('#id_file_content').val(sjcl.encrypt('pppppppppp', result))
+
             $('#id_name').val(sjcl.encrypt('pppppppppp', file.name));
         };
         reader.readAsBinaryString(file);
@@ -49,15 +72,13 @@ $(document).ready(function () {
         });
     });
 
-    $('.download').click(function(e){
+    $('.download').click(function (e) {
         e.preventDefault();
 
         $.getJSON($(this).attr('href'), function (answer) {
 
-            console.log(typeof answer.file_content);
-            console.log(JSON.parse(answer.file_content));
-
-            download(sjcl.decrypt('pppppppppp', JSON.stringify(JSON.parse(answer.file_content))), sjcl.decrypt('pppppppppp', answer.name), 'text/plain');
+            var sampleBytes = base64ToArrayBuffer(sjcl.decrypt('pppppppppp', JSON.stringify(JSON.parse(answer.file_content))));
+            saveByteArray([sampleBytes], sjcl.decrypt('pppppppppp', answer.name));
 
         });
 
