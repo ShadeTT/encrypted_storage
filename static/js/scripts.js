@@ -1,5 +1,25 @@
 $(document).ready(function () {
 
+    _.templateSettings.variable = "rc";
+    function update_content() {
+        var template = _.template(
+            $("script.template").html()
+        );
+
+        var parent_id = $("#id_parent_id").data("parent_id");
+        var url = "/content_list/";
+
+        if (parent_id != ""){
+            url += parent_id + "/";
+        }
+
+        $.getJSON(url, function (response) {
+            $(".wrapper").html(template(response));
+        });
+    }
+
+    update_content();
+
     function base64ToArrayBuffer(base64) {
         var binaryString = base64;
         var binaryLen = binaryString.length;
@@ -25,7 +45,6 @@ $(document).ready(function () {
         };
     }());
 
-
     document.querySelector('input[type="file"]').addEventListener('change', function (e) {
         var file = this.files[0];
         var reader = new FileReader();
@@ -40,6 +59,30 @@ $(document).ready(function () {
 
     }, false);
 
+    $("#id-create-folder").submit(function (e) {
+
+        $('#id_name_folder_hidden').val(sjcl.encrypt('pppppppppp', $('#id_name_folder').val()));
+
+        var formData = new FormData(this);
+        var url = $(this).attr("action");
+
+        e.preventDefault();
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            async: false,
+            success: function (data) {
+                update_content();
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+
+        return false;
+    });
 
     $("#id-upload-form").submit(function (e) {
 
@@ -56,7 +99,7 @@ $(document).ready(function () {
             data: formData,
             async: false,
             success: function (data) {
-                console.log(data);
+                update_content();
             },
             cache: false,
             contentType: false,
@@ -68,13 +111,19 @@ $(document).ready(function () {
 
     $('#id_decrypt').click(function () {
         $(".encrypted").each(function (i) {
-            $(this).text(sjcl.decrypt('pppppppppp', JSON.stringify($(this).data("content"))));
+
+            try {
+                $(this).text(sjcl.decrypt('pppppppppp', JSON.stringify($(this).data("content"))));
+            } catch (err) {
+                $(this).text("");
+            }
         });
+        $(".hide-if-encrypted").removeClass("hide-if-encrypted");
     });
 
-    $('.download').click(function (e) {
-        e.preventDefault();
+    $('.wrapper').on("click", '.download', function (e) {
 
+        e.preventDefault();
         $.getJSON($(this).attr('href'), function (answer) {
 
             var sampleBytes = base64ToArrayBuffer(sjcl.decrypt('pppppppppp', JSON.stringify(JSON.parse(answer.file_content))));

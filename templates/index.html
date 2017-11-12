@@ -1,69 +1,141 @@
 {% load static %}
 {% load thumbnail %}
+{% load mptt_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'css/slider.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
 
 </head>
 <body style="position: relative">
 
+<div class="breadcrumbs">
+    {% if parent_id %}
+        <a class="hide-if-encrypted" href="{% url 'app:index' %}">root&nbsp;/</a>
+    {% endif %}
+    {% for ancestor in ancestors %}
+        <a class="encrypted" data-content="{{ ancestor.name }}" href="{% url 'app:index' ancestor.id %}"></a>
+        <span class="hide-if-encrypted">&nbsp;/&nbsp;</span>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn btn-primary right-button" id="id_decrypt" style="background-image: url({% static 'images/padlockIcon50.png' %});top: 80px;"></button>
+<button type="button" class="btn btn-primary right-button" data-toggle="modal" data-target="#uploadModal" id="id_upload" style="background-image: url({% static 'images/c065867ac7beefe25dc50a1869ae057e50.png' %});top: 135px;"></button>
+<button type="button" class="btn btn-primary right-button" data-toggle="modal" data-target="#createFolderModal" style="background-image: url({% static 'images/create_folder50.png' %});top: 190px;"></button>
 <div class="wrapper">
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>File</th>
-            <th>Description</th>
-            <th>User</th>
-            <th>Created</th>
-            <th>Updated</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for uploadedfile in uploadedfile_list %}
-            <tr>
-                <th>
-                    <a href="{% url 'app:download' uploadedfile.id %}" data-content="{{ uploadedfile.name }}" class="encrypted download">Нужен ключ</a>
-                </th>
-                <td class="encrypted" data-content="{{ uploadedfile.description }}">Нужен ключ</td>
-                <th>{{ uploadedfile.user.username }}</th>
-                <td>{{ uploadedfile.created }}</td>
-                <td>{{ uploadedfile.updated }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<div id="id_decrypt" style="background-image: url({% static 'images/padlockIcon.png' %});width: 100px;top: 80px;height: 100px;position: fixed;right: 0;box-shadow: 0 0 8px grey;cursor: pointer">
 
 </div>
 
-<div id="slider" style="right:-404px;">
-    <div id="sidebar" onclick="open_panel()">
-        <img src="{% static 'images/c065867ac7beefe25dc50a1869ae057e.png' %}">
+<span id="id_parent_id" data-parent_id="{{ parent_id|default:'' }}"></span>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'app:upload' %}" id="id-upload-form">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Файл</label>
+                        <input type="file" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Описание:</label>
+                        <textarea id="id_description" class="form-control"></textarea>
+                    </div>
+
+                    <input type="hidden" name="file_content" id="id_file_content">
+                    <input type="hidden" name="name" id="id_name">
+                    <input type="hidden" name="description" id="id_description_hidden">
+                    <input type="hidden" name="folder" value="{{ parent_id }}">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <input type="submit" class="btn btn-primary" value="Отправить">
+                </div>
+            </form>
+        </div>
     </div>
-    <div id="header">
-        <form action="{% url 'app:upload' %}" id="id-upload-form">
-            <input type="file">
-            <input type="hidden" name="file_content" id="id_file_content">
-            <input type="hidden" name="name" id="id_name">
-            <input type="hidden" name="description" id="id_description_hidden">
-            <textarea id="id_description" cols="30" rows="30"></textarea>
-            <input type="submit" value="Отправить">
-        </form>
+</div>
+
+<div class="modal fade" id="createFolderModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% if parent_id %}{% url 'app:create_folder' parent_id %}{% else %}{% url 'app:create_folder' %}{% endif %} " id="id-create-folder">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Имя</label>
+                        <input type="text" class="form-control" id="id_name_folder">
+                        <input type="hidden" name="name" id="id_name_folder_hidden">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <input type="submit" class="btn btn-primary" value="Отправить">
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="{% static 'js/slider.js' %}"></script>
 <script src="{% static 'js/csrf.js' %}"></script>
 <script src="https://bitwiseshiftleft.github.com/sjcl/sjcl.js"></script>
+<script src="{% static 'js/underscore-min.js' %}"></script>
 <script src="{% static 'js/scripts.js' %}"></script>
+
+<script type="text/template" class="template">
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Описание</th>
+            <th>Пользователь</th>
+            <th>Дата создания</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <% _.each( rc.folders, function(folder){ %>
+        <tr class="folder">
+            <td>
+                <a href="<%- folder.url %>" data-content="<%- folder.name %>" class="encrypted">Нужен ключ</a>
+            </td>
+            <td class="encrypted" data-content="<%- folder.description %>">Нужен ключ</td>
+            <td><%- folder.user %></td>
+            <td><%- folder.created %></td>
+        </tr>
+
+        <% }); %>
+
+        <% _.each( rc.files, function(file){ %>
+        <tr>
+            <td>
+                <a href="<%- file.url %>" data-content="<%- file.name %>" class="encrypted download">Нужен ключ</a>
+            </td>
+            <td class="encrypted" data-content="<%- file.description %>">Нужен ключ</td>
+            <td><%- file.user %></td>
+            <td><%- file.created %></td>
+        </tr>
+
+        <% }); %>
+        </tbody>
+</script>
 </body>
 </html>
