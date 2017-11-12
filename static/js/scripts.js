@@ -1,4 +1,8 @@
+"use strict";
+
 $(document).ready(function () {
+
+    var key;
 
     _.templateSettings.variable = "rc";
     function update_content() {
@@ -9,16 +13,31 @@ $(document).ready(function () {
         var parent_id = $("#id_parent_id").data("parent_id");
         var url = "/content_list/";
 
-        if (parent_id != ""){
+        if (parent_id != "") {
             url += parent_id + "/";
         }
 
         $.getJSON(url, function (response) {
             $(".wrapper").html(template(response));
+            if (key != undefined) {
+                decrypt();
+            }
         });
     }
 
     update_content();
+
+    function decrypt() {
+        $(".encrypted").each(function (i) {
+
+            try {
+                $(this).text(sjcl.decrypt(key, JSON.stringify($(this).data("content"))));
+            } catch (err) {
+                $(this).text("");
+            }
+        });
+        $(".hide-if-encrypted").removeClass("hide-if-encrypted");
+    }
 
     function base64ToArrayBuffer(base64) {
         var binaryString = base64;
@@ -45,23 +64,35 @@ $(document).ready(function () {
         };
     }());
 
-    document.querySelector('input[type="file"]').addEventListener('change', function (e) {
+    document.querySelector("input#id_file[type='file']").addEventListener("change", function (e) {
         var file = this.files[0];
         var reader = new FileReader();
         reader.onload = function (e) {
             var result = this.result;
 
-            $('#id_file_content').val(sjcl.encrypt('pppppppppp', result));
+            $("#id_file_content").val(sjcl.encrypt(key, result));
 
-            $('#id_name').val(sjcl.encrypt('pppppppppp', file.name));
+            $("#id_name").val(sjcl.encrypt(key, file.name));
         };
         reader.readAsBinaryString(file);
 
     }, false);
 
+    document.querySelector("input#id_key[type='file']").addEventListener("change", function (e) {
+        var file = this.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            key = this.result;
+
+            $(".right-button.hidden").removeClass("hidden");
+            decrypt();
+        };
+        reader.readAsText(file);
+    }, false);
+
     $("#id-create-folder").submit(function (e) {
 
-        $('#id_name_folder_hidden').val(sjcl.encrypt('pppppppppp', $('#id_name_folder').val()));
+        $("#id_name_folder_hidden").val(sjcl.encrypt(key, $("#id_name_folder").val()));
 
         var formData = new FormData(this);
         var url = $(this).attr("action");
@@ -70,7 +101,7 @@ $(document).ready(function () {
 
         $.ajax({
             url: url,
-            type: 'POST',
+            type: "POST",
             data: formData,
             async: false,
             success: function (data) {
@@ -86,7 +117,7 @@ $(document).ready(function () {
 
     $("#id-upload-form").submit(function (e) {
 
-        $('#id_description_hidden').val(sjcl.encrypt('pppppppppp', $('#id_description').val()));
+        $("#id_description_hidden").val(sjcl.encrypt(key, $("#id_description").val()));
 
         var formData = new FormData(this);
         var url = $(this).attr("action");
@@ -95,7 +126,7 @@ $(document).ready(function () {
 
         $.ajax({
             url: url,
-            type: 'POST',
+            type: "POST",
             data: formData,
             async: false,
             success: function (data) {
@@ -109,28 +140,19 @@ $(document).ready(function () {
         return false;
     });
 
-    $('#id_decrypt').click(function () {
-        $(".encrypted").each(function (i) {
+    $("#id_decrypt").click(function () {
 
-            try {
-                $(this).text(sjcl.decrypt('pppppppppp', JSON.stringify($(this).data("content"))));
-            } catch (err) {
-                $(this).text("");
-            }
-        });
-        $(".hide-if-encrypted").removeClass("hide-if-encrypted");
+        $("input#id_key[type=file]").trigger("click");
     });
 
-    $('.wrapper').on("click", '.download', function (e) {
+    $(".wrapper").on("click", ".download", function (e) {
 
         e.preventDefault();
-        $.getJSON($(this).attr('href'), function (answer) {
+        $.getJSON($(this).attr("href"), function (answer) {
 
-            var sampleBytes = base64ToArrayBuffer(sjcl.decrypt('pppppppppp', JSON.stringify(JSON.parse(answer.file_content))));
-            saveByteArray([sampleBytes], sjcl.decrypt('pppppppppp', answer.name));
-
+            var sampleBytes = base64ToArrayBuffer(sjcl.decrypt(key, JSON.stringify(JSON.parse(answer.file_content))));
+            saveByteArray([sampleBytes], sjcl.decrypt(key, answer.name));
         });
-
     });
 
     function download(text, name, type) {

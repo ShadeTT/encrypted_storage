@@ -18,6 +18,10 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
+from app.admin import CustomAdminSite
+
+# admin.site.login = CustomAdminSite()
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('app.urls', namespace='app')),
@@ -25,3 +29,4 @@ urlpatterns = [
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
