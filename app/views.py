@@ -51,7 +51,7 @@ def content_list(request, parent_id=None):
                 'name': f.name,
                 'id': f.id,
                 'user': f.user.username,
-                'created': f.created,
+                'created': f.created.strftime('%d.%m.%Y %H:%M:%S'),
                 'url': reverse('app:index', kwargs={'parent_id': f.id})
             } for f in folders
             ],
@@ -60,7 +60,7 @@ def content_list(request, parent_id=None):
                 'name': f.name,
                 'id': f.id,
                 'user': f.user.username,
-                'created': f.created,
+                'created': f.created.strftime('%d.%m.%Y %H:%M:%S'),
                 'url': reverse('app:download', kwargs={'pk': f.id})
             } for f in files
             ]
